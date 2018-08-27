@@ -9,9 +9,9 @@ export default class Web3WalletAdapter {
     // this.type = wallet.type
     this.length = 1
     // Assign methods to external expected names, and bind to present context
-    this.getAccounts = this._getAccounts.bind(this)
     this.signTransaction = this._signTransaction.bind(this)
     this.signMessage = this._signMessage.bind(this)
+    // this.getAccounts = this._getAccounts.bind(this)
   }
 
   // ============== (Start) EthereumJs-wallet interface methods ======================
@@ -131,13 +131,13 @@ export default class Web3WalletAdapter {
   // ============== (End) Utility methods ======================
   // ============== (Start) Operational Methods ======================
 
-  async _getAccounts () {
-    if (this.privateKeyAvailable()) {
-      return this.address
-    } else {
-      return this.wallet.getAccounts.apply(this, arguments)
-    }
-  }
+  // async _getAccounts () {
+  //   if (this.privateKeyAvailable()) {
+  //     return this.address
+  //   } else {
+  //     return this.wallet.getAccounts.apply(this, arguments)
+  //   }
+  // }
 
   _signTransaction (tx) {
     return new Promise((resolve, reject) => {
