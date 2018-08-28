@@ -99,11 +99,13 @@ export default {
       this.resetPaginationValues()
     })
 
-    this.$refs.switchAddressModal.$on('show', () => {
+    this.$refs.switchAddressModal.$once('shown', () => {
       const indexRegex = /\/(\d+)\s*$/
       const addressDerivePath = this.$store.state.wallet.wallet.wallet.path
       const baseIndex = indexRegex.exec(addressDerivePath)
-      console.log(baseIndex) // todo remove dev item
+      this.minIndex = +baseIndex[1]
+      this.currentIndex = +baseIndex[1]
+      console.log(this.minIndex) // todo remove dev item
       this.getAddresses(5, baseIndex[1])
         .then(_result => {
           this.displayAddresses = _result
@@ -153,8 +155,24 @@ export default {
       // this.hardwareWallet.setActiveAddress(details.address, details.index)
     },
     priorAddressSet () {
-      if (this.currentIndex - this.count > 0) {
+      let priorSetStart = this.currentIndex - this.count - this.count
+      if (priorSetStart < this.minIndex) {
+        if (priorSetStart <= 0) {
+          this.currentIndex = 0
+          this.minIndex = 0
+          priorSetStart = 0
+        } else {
+          this.currentIndex = priorSetStart
+          this.minIndex = priorSetStart
+        }
+        console.log(priorSetStart) // todo remove dev item
+        this.getAddresses(this.count, priorSetStart)
+          .then(addressSet => {
+            this.displayAddresses = addressSet
+          })
+      } else if (this.currentIndex - this.count > 0) {
         this.currentIndex = this.currentIndex - this.count
+
         this.displayAddresses = this.hardwareAddresses.slice(this.currentIndex - this.count, this.currentIndex)
       } else {
         this.offset = 0
@@ -162,17 +180,26 @@ export default {
         this.displayAddresses = this.hardwareAddresses.slice(0, 5)
       }
     },
+
+    /*
+    *
+    *         let bottomBound = this.currentIndex - this.count
+        let upperBound = this.currentIndex
+        */
     nextAddressSet () {
-      if (this.currentIndex + this.count < this.maxIndex) {
+      if ((this.currentIndex + this.count) < this.maxIndex) {
         this.currentIndex = this.currentIndex + this.count
+        console.log('1', this.currentIndex, this.currentIndex + this.count) // todo remove dev item
         this.displayAddresses = this.hardwareAddresses.slice(this.currentIndex, this.currentIndex + this.count)
-      } else if (this.currentIndex + this.count === this.maxIndex) {
+      } else if ((this.currentIndex + this.count) === this.maxIndex) {
         this.currentIndex = this.currentIndex + this.count
+        console.log('2', this.count, this.currentIndex) // todo remove dev item
         this.getAddresses(this.count, this.currentIndex)
           .then(addressSet => {
             this.displayAddresses = addressSet
           })
       } else {
+        console.log('3', this.count, this.currentIndex) // todo remove dev item
         this.getAddresses(this.count, this.currentIndex)
           .then(addressSet => {
             this.displayAddresses = addressSet
@@ -181,11 +208,12 @@ export default {
     },
     getAddresses (count = 5, offset = 0) {
       return new Promise((resolve, reject) => {
-        if (this.minIndex < ((offset + count) - this.maxIndex) || offset + count > this.maxIndex) {
+        console.log('getAddresses', +count, +offset) // todo remove dev item
+        if (offset >= 0 || offset + count > this.maxIndex) {
           this.connectionActive = !this.connectionActive
           const web3 = this.$store.state.web3
           let hardwareAddresses = []
-          this.$store.state.wallet.wallet.getMultipleAccounts(count, offset)
+          this.$store.state.wallet.wallet.getMultipleAccounts(+count, +offset)
             .then(_accounts => {
               Object.values(_accounts).forEach(async (address, i) => {
                 const rawBalance = await this.$store.state.web3.eth.getBalance(address)
@@ -193,7 +221,12 @@ export default {
                 hardwareAddresses.push({index: +offset + i, address, balance})
                 this.hardwareAddresses.push({index: +offset + i, address, balance})
               })
-              this.maxIndex = +offset + count
+              if (this.maxIndex <= (+offset + count)) {
+                this.maxIndex = +offset + count
+              }
+              if (this.minIndex >= +offset) {
+                this.minIndex = +offset
+              }
               this.currentIndex = +offset + count
               this.connectionActive = !this.connectionActive
               resolve(hardwareAddresses)

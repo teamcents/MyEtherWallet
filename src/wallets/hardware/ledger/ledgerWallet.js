@@ -194,6 +194,7 @@ export default class LedgerWallet extends HardwareWalletInterface {
   async _getAccounts (_accountsLength, _accountsOffset) {
     const transport = await this.getTransport()
     try {
+      console.log(_accountsLength, _accountsOffset) // todo remove dev item
       const accountsOffset = _accountsOffset || this.accountsOffset
       const accountsLength = _accountsLength || this.accountsLength
       const eth = new Ledger(transport)
