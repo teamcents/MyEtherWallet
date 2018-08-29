@@ -12,14 +12,14 @@
               <div class="title-block">
                 <div class="title-popover">
                   <h3>{{ $t("createWallet.yourPw") }}</h3>
-                  <popover :popcontent="$t('popover.whatIsMessageContent')" />
+                  <popover :popcontent="$t('popover.whatIsMessageContent')"/>
                 </div>
               </div>
 
-              <create-wallet-input v-model='password' :switcher="switcher" :param="'Json'" />
-              <create-wallet-input-footer />
+              <create-wallet-input v-model='password' :switcher="switcher" :param="'Json'"/>
+              <create-wallet-input-footer/>
             </b-tab>
-            <b-tab title="By Mnemonic Phrase" >
+            <b-tab title="By Mnemonic Phrase">
 
               <div class="title-block">
                 <div class="title-popover">
@@ -28,13 +28,13 @@
                 </div>
               </div>
 
-              <create-wallet-input v-model='password' :switcher="switcher" :param="'Mnemonic'" />
-              <create-wallet-input-footer />
+              <create-wallet-input v-model='password' :switcher="switcher" :param="'Mnemonic'"/>
+              <create-wallet-input-footer/>
             </b-tab>
           </b-tabs>
         </div>
-        <by-json-file-container v-if="byJson && !byMnemonic" :password="password" />
-        <by-mnemonic-container v-if="!byJson && byMnemonic" />
+        <by-json-file-container v-if="byJson && !byMnemonic" :password="password"/>
+        <by-mnemonic-container v-if="!byJson && byMnemonic"/>
       </div>
     </div>
 
@@ -44,6 +44,7 @@
 </template>
 
 <script>
+import store from 'store'
 import ByJsonFileContainer from '@/containers/ByJsonFileContainer'
 import ByMnemonicContainer from '@/containers/ByMnemonicContainer'
 import TutorialModal from './components/TutorialModal'
@@ -83,14 +84,17 @@ export default {
       }
     },
     skip () {
-      localStorage.setItem('skipTutorial', true)
+      store.set('skipTutorial', true)
       this.$children[0].$refs.tutorial.hide()
     }
   },
   mounted () {
-    let skipTutorial = localStorage.getItem('skipTutorial')
-    if (skipTutorial === undefined || skipTutorial === null || skipTutorial === false) {
-      this.$children[0].$refs.tutorial.show()
+    let skipTutorial = store.get('skipTutorial')
+    let tutorialComplete = store.get('tutorialComplete')
+    if (tutorialComplete === undefined) {
+      if (skipTutorial === undefined || skipTutorial === null || skipTutorial === false) {
+        this.$children[0].$refs.tutorial.show()
+      }
     }
   }
 }

@@ -19,7 +19,10 @@
             <a href="">Help Center</a>. We have many articles to assist you!
           </p>
 
-          <router-link to="/create-wallet"><div class="mid-round-button-green-filled-green-border">Get Started</div></router-link>
+          <div class="mid-round-button-green-filled-green-border" @click="complete">Get Started</div>
+          <!--<router-link to="/create-wallet">-->
+            <!--<div class="mid-round-button-green-filled-green-border">Get Started</div>-->
+          <!--</router-link>-->
 
         </div>
       </dir>
@@ -29,14 +32,18 @@
 </template>
 
 <script>
+import store from 'store'
 
 export default {
   props: ['progressBarValue'],
-  components: {
-  },
+  components: {},
   data () {
-    return {
-
+    return {}
+  },
+  methods: {
+    complete () {
+      store.set('tutorialComplete', true)
+      this.$router.push({path: 'create-wallet'})
     }
   }
 }

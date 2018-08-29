@@ -32,7 +32,6 @@
             </label>
           </li>
         </ul>
-
       </div> <!-- .address-block-container -->
 
       <div class="address-nav">
