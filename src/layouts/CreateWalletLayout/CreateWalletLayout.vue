@@ -84,6 +84,7 @@
 </template>
 
 <script>
+import store from 'store'
 import ByJsonFileContainer from './containers/ByJsonFileContainer';
 import ByMnemonicContainer from './containers/ByMnemonicContainer';
 import TutorialModal from './components/TutorialModal';
@@ -134,12 +135,21 @@ export default {
         this.byMnemonic = false;
       }
     },
-    skip() {
-      localStorage.setItem('skipTutorial', true);
-      this.$refs.tutorialModal.$refs.tutorial.hide();
+    skip () {
+      store.set('skipTutorial', true)
+      this.$children[0].$refs.tutorial.hide()
     },
     scanToDownloadModalOpen() {
       this.$refs.scanToDownloadModal.$refs.scantodownload.show();
+    }
+  },
+  mounted () {
+    let skipTutorial = store.get('skipTutorial')
+    let tutorialComplete = store.get('tutorialComplete')
+    if (tutorialComplete === undefined) {
+      if (skipTutorial === undefined || skipTutorial === null || skipTutorial === false) {
+        this.$children[0].$refs.tutorial.show()
+      }
     }
   }
 };
