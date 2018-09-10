@@ -19,13 +19,14 @@
           <currency-picker
             :currency="fromArray"
             :token="true"
-            page="SwapContainerFrom"/>
+            page="SwapContainerFrom"
+            @selectedCurrency="setFromCurrency"/>
           <div class="the-form amount-number">
             <input
               type="number"
               name=""
               value=""
-              placeholder="Deposit Amount" >
+              placeholder="Deposit Amount">
           </div>
         </div>
         <div class="exchange-icon">
@@ -38,13 +39,14 @@
           <currency-picker
             :currency="toArray"
             :token="true"
-            page="SwapContainerTo"/>
+            page="SwapContainerTo"
+            @selectedCurrency="setToCurrency"/>
           <div class="the-form amount-number">
             <input
               type="number"
               name=""
               value=""
-              placeholder="Received Amount" >
+              placeholder="Received Amount">
           </div>
         </div>
       </div>
@@ -100,7 +102,7 @@
           type="number"
           name=""
           value=""
-          placeholder="Gas Amount" >
+          placeholder="Gas Amount">
         <div class="good-button-container">
           <p>Gwei</p>
           <i
@@ -168,6 +170,15 @@ export default {
   methods: {
     swapConfirmationModalOpen() {
       this.$children[0].$refs.swapconfirmation.show();
+    },
+    setFromCurrency(value) {
+      console.log(value.symbol); // todo remove dev item
+    },
+    setToCurrency(value) {
+      console.log(value.symbol); // todo remove dev item
+    },
+    updateValidPairs() {
+      // this.toArray;
     }
   }
 };

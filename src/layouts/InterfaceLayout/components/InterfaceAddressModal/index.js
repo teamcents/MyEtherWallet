@@ -1,1 +1,1 @@
-export { default } from './InterfaceAddressModal'
+export { default } from './InterfaceAddressModal';

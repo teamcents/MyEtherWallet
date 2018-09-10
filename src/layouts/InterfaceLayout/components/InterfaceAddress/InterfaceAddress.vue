@@ -29,7 +29,10 @@
             @click="copy">
             <img src="~@/assets/images/icons/copy.svg">
           </b-btn>
-          <b-btn class="custom-tooltip" @click="switchAddress" id="switch">
+          <b-btn 
+            id="switch" 
+            class="custom-tooltip" 
+            @click="switchAddress">
             <img src="~@/assets/images/icons/change.svg">
           </b-btn>
           <b-popover
@@ -53,13 +56,13 @@
         </div>
       </div>
     </div>
-    <interface-address-modal ref="switchAddressModal"></interface-address-modal>
+    <interface-address-modal ref="switchAddressModal"/>
   </div>
 </template>
 
 <script>
-import Blockie from '@/components/Blockie'
-import InterfaceAddressModal from '../InterfaceAddressModal'
+import Blockie from '@/components/Blockie';
+import InterfaceAddressModal from '../InterfaceAddressModal';
 
 export default {
   components: {
@@ -77,8 +80,8 @@ export default {
       this.$refs.copyAddress.select();
       document.execCommand('copy');
     },
-    switchAddress () {
-      this.$refs.switchAddressModal.$refs.switchAddressModal.show()
+    switchAddress() {
+      this.$refs.switchAddressModal.$refs.switchAddressModal.show();
     }
   }
 };

@@ -19,10 +19,12 @@
             <a href="">Help Center</a>. We have many articles to assist you!
           </p>
 
-          <div class="mid-round-button-green-filled-green-border" @click="complete">Get Started</div>
-          <!--<router-link to="/create-wallet">-->
+          <div 
+            class="mid-round-button-green-filled-green-border" 
+            @click="complete">Get Started</div>
+            <!--<router-link to="/create-wallet">-->
             <!--<div class="mid-round-button-green-filled-green-border">Get Started</div>-->
-          <!--</router-link>-->
+            <!--</router-link>-->
 
         </div>
       </dir>
@@ -32,23 +34,23 @@
 </template>
 
 <script>
-import store from 'store'
+import store from 'store';
 
 export default {
+  components: {},
   props: {
     progressBarValue: {
       type: String,
       default: ''
     }
   },
-  components: {},
-  data () {
-    return {}
+  data() {
+    return {};
   },
   methods: {
     complete() {
-      store.set('tutorialComplete', true)
-      this.$router.push({ path: 'create-wallet' })
+      store.set('tutorialComplete', true);
+      this.$router.push({ path: 'create-wallet' });
     }
   }
 };
