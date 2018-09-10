@@ -10,9 +10,6 @@ module.exports = {
     node: {
       process: true
     },
-    css: {
-      sourceMap: true
-    },
     output: {
       globalObject: 'this'
     },
