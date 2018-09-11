@@ -1,4 +1,4 @@
-import Vue from 'vue';
+import { shallowMount } from '@vue/test-utils';
 
 xdescribe('DeployContractContainer.vue', () => {
   it('should render correct contents', () => {

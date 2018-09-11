@@ -1,4 +1,4 @@
-import Vue from 'vue';
+import { shallowMount } from '@vue/test-utils';
 
 xdescribe('PageTitle.vue', () => {
   it('should render correct contents', () => {

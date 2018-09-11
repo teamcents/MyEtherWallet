@@ -1,4 +1,4 @@
-import Vue from 'vue';
+import { shallowMount } from '@vue/test-utils';
 
 xdescribe('web3-overide-mew.js', () => {
   it('should render correct contents', () => {
