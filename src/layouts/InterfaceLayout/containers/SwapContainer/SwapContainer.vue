@@ -16,8 +16,8 @@
           <div class="title">
             <h4>{{ $t('common.from') }}</h4>
           </div>
-          <currency-picker
-            :currency="fromArray"
+          <swap-currency-picker
+            :currencies="fromArray"
             :token="true"
             page="SwapContainerFrom"
             @selectedCurrency="setFromCurrency"/>
@@ -36,8 +36,8 @@
           <div class="title">
             <h4>{{ $t('common.to') }}</h4>
           </div>
-          <currency-picker
-            :currency="toArray"
+          <swap-currency-picker
+            :currencies="toArray"
             :token="true"
             page="SwapContainerTo"
             @selectedCurrency="setToCurrency"/>
@@ -127,8 +127,9 @@
   </div>
 </template>
 <script>
+/*eslint-disable*/
+
 import ProvidersRadioSelector from '../../components/ProvidersRadioSelector';
-import CurrencyPicker from '../../components/CurrencyPicker';
 import DropDownAddressSelector from '@/components/DropDownAddressSelector';
 import InterfaceBottomText from '@/components/InterfaceBottomText';
 import InterfaceContainerTitle from '../../components/InterfaceContainerTitle';
@@ -136,36 +137,62 @@ import swapIcon from '@/assets/images/icons/swap.svg';
 import ImageKybernetowrk from '@/assets/images/etc/kybernetowrk.png';
 import ImageBity from '@/assets/images/etc/bity.png';
 import ImageVisaMaster from '@/assets/images/etc/visamaster.png';
+
+import SwapCurrencyPicker from './components/SwapCurrencyPicker';
 import SwapConfirmationModal from './components/SwapConfirmationModal';
+
+import { BitySwap, currencies as partnerConfig } from '@/partners';
 
 export default {
   components: {
     'interface-bottom-text': InterfaceBottomText,
     'interface-container-title': InterfaceContainerTitle,
-    'currency-picker': CurrencyPicker,
+    'swap-currency-picker': SwapCurrencyPicker,
     'drop-down-address-selector': DropDownAddressSelector,
     'providers-radio-selector': ProvidersRadioSelector,
     'swap-confirmation-modal': SwapConfirmationModal
   },
   data() {
     return {
+      bitySwap: {},
       images: {
         kybernetowrk: ImageKybernetowrk,
         bity: ImageBity,
         visaMaster: ImageVisaMaster,
         swap: swapIcon
       },
+      fromCurrency: 'BTC',
+      toCurrency: 'ETH',
       toArray: [
         { symbol: 'BTC', name: 'Bitcoin' },
-        { symbol: 'Aug', name: 'Augur' },
+        { symbol: 'REP', name: 'Augur' },
         { symbol: 'OMG', name: 'OhMyGod' }
       ],
       fromArray: [
         { symbol: 'BTC', name: 'Bitcoin' },
-        { symbol: 'Aug', name: 'Augur' },
+        { symbol: 'REP', name: 'Augur' },
         { symbol: 'OMG', name: 'OhMyGod' }
       ]
     };
+  },
+  computed: {
+    // toAvailable() {},
+    // fromAvailable() {}
+  },
+  mounted() {
+    this.bitySwap = new BitySwap();
+    console.log(this.$store.state.networks); // todo remove dev item
+    this.bitySwap.getRates().then(_bityRates => {
+      console.log(partnerConfig.currencies); // todo remove dev item
+      // _bityRates.forEach(item =>{
+      //   partnerConfig.currencies.filter(curr => {
+      //     item
+      //   });
+      // })
+      // this.toArray = partnerConfig.currencies.filter(curr => {
+      //
+      // });
+    });
   },
   methods: {
     swapConfirmationModalOpen() {
