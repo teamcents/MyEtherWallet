@@ -9,4 +9,4 @@ const fiat = [{ symbol: '', name: '' }];
 
 const changellyCurrencies = [{ symbol: '', name: '' }];
 
-export default { currencies };
+export default { currencies, changellyCurrencies, fiat };

@@ -1,18 +1,18 @@
-const SERVERURL = 'https://bity.myetherapi.com';
-const BITYRATEAPI = 'https://bity.com/api/v1/rate2/';
-
-const getQuote = () => {
-  return fetch(BITYRATEAPI, {
-    method: 'GET'
-  });
-};
-const getOrder = reqObj => {
-  return axios.post(`${host.url}/order`, reqObj);
-};
-const getStatus = userId => {
-  return axios.get(`${host.url}/status/${userId}`);
-};
-export { getQuote, getOrder, getStatus };
+// const SERVERURL = 'https://bity.myetherapi.com';
+// const BITYRATEAPI = 'https://bity.com/api/v1/rate2/';
+//
+// const getQuote = () => {
+//   return fetch(BITYRATEAPI, {
+//     method: 'GET'
+//   });
+// };
+// const getOrder = reqObj => {
+//   return axios.post(`${host.url}/order`, reqObj);
+// };
+// const getStatus = userId => {
+//   return axios.get(`${host.url}/status/${userId}`);
+// };
+// export { getQuote, getOrder, getStatus };
 
 // postData(`http://example.com/answer`, {answer: 42})
 //   .then(data => console.log(JSON.stringify(data))) // JSON-string from `response.json()` call
