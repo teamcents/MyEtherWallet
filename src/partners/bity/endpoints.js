@@ -18,6 +18,8 @@
 //   .then(data => console.log(JSON.stringify(data))) // JSON-string from `response.json()` call
 //   .catch(error => console.error(error));
 //
+//
+//
 // function postData(url = ``, data = {}) {
 //   // Default options are marked with *
 //   return fetch(url, {

@@ -4,6 +4,7 @@ import {currencies as currencyDetails} from '../config'
 
 export default class BitySwap {
   constructor() {
+    this.source = 'bity';
     this.SERVERURL = 'https://bity.myetherapi.com';
     this.BITYRATEAPI = 'https://bity.com/api/v1/rate2/';
     this.decimals = 6;
@@ -40,6 +41,7 @@ export default class BitySwap {
         // this.currentRates[pair.pair] = parseFloat(pair.rate_we_sell);
         if (pair.is_enabled && !this.fiatCurrencies.includes(pair.source)) {
           this.addRateEntry(
+            pair.pair,
             pair.source,
             pair.target,
             parseFloat(pair.rate_we_sell)
@@ -48,6 +50,7 @@ export default class BitySwap {
       } else if (this.mainPairs.indexOf(pair.pair.substring(0, 3)) !== -1) {
         if (pair.is_enabled && !this.fiatCurrencies.includes(pair.source)) {
           this.addRateEntry(
+            pair.pair,
             pair.source,
             pair.target,
             parseFloat(pair.rate_we_buy)
@@ -65,14 +68,14 @@ export default class BitySwap {
     this.allAvailable.push({from: from, to: to})
   }
 
-  addRateEntry(from, to, rate, isFrom) {
-    if(isFrom){
-      this.fromAvailable.set(from, { from: from, to: to, rate: rate})
-    } else {
-      this.toAvailable.set(to, { from: from, to: to, rate: rate})
-    }
-
-    this.currentRates.push({ from: from, to: to, rate: rate});
+  addRateEntry(pair, from, to, rate, isFrom) {
+    // if(isFrom){
+    //   this.fromAvailable.set(from, {pair: pair, from: from, to: to, rate: rate, source: this.source})
+    // } else {
+    //   this.toAvailable.set(to, {pair: pair, from: from, to: to, rate: rate, source: this.source})
+    // }
+    console.log(pair, from, to); // todo remove dev item
+    this.currentRates.push({pair: from + '/' + to, from: from, to: to, rate: rate, source: this.source});
   }
 
   buildOrder() {

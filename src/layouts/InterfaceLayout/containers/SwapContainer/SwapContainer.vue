@@ -129,7 +129,7 @@
 <script>
 /*eslint-disable*/
 
-import ProvidersRadioSelector from '../../components/ProvidersRadioSelector';
+import ProvidersRadioSelector from './components/ProvidersRadioSelector';
 import DropDownAddressSelector from '@/components/DropDownAddressSelector';
 import InterfaceBottomText from '@/components/InterfaceBottomText';
 import InterfaceContainerTitle from '../../components/InterfaceContainerTitle';
@@ -141,7 +141,14 @@ import ImageVisaMaster from '@/assets/images/etc/visamaster.png';
 import SwapCurrencyPicker from './components/SwapCurrencyPicker';
 import SwapConfirmationModal from './components/SwapConfirmationModal';
 
-import { BitySwap, currencies as partnerConfig } from '@/partners';
+import {
+  BitySwap,
+  bityCurrencies,
+  kyberCurrencies,
+  currencies as partnerConfig,
+  changellyCurrencies,
+  CurrencyFilter
+} from '@/partners';
 
 export default {
   components: {
@@ -180,32 +187,89 @@ export default {
     // fromAvailable() {}
   },
   mounted() {
-    this.bitySwap = new BitySwap();
-    console.log(this.$store.state.networks); // todo remove dev item
-    this.bitySwap.getRates().then(_bityRates => {
-      console.log(partnerConfig.currencies); // todo remove dev item
-      // _bityRates.forEach(item =>{
-      //   partnerConfig.currencies.filter(curr => {
-      //     item
-      //   });
-      // })
-      // this.toArray = partnerConfig.currencies.filter(curr => {
-      //
-      // });
-    });
+    const collectMap = new Map();
+    for(let prop in bityCurrencies){
+      if(bityCurrencies[prop]) collectMap.set(prop, { symbol: prop, name: bityCurrencies[prop].name })
+    }
+    for(let prop in kyberCurrencies){
+      if(kyberCurrencies[prop]) collectMap.set(prop, { symbol: prop, name: kyberCurrencies[prop].name })
+    }
+    for(let prop in changellyCurrencies){
+      if(changellyCurrencies[prop]) collectMap.set(prop, { symbol: prop, name: changellyCurrencies[prop].name })
+    }
+    collectMap.set('ETH', { symbol: 'ETH', name: 'Ether' })
+    // if(collectMap.has(this.toCurrency))
+    this.toArray = Array.from(collectMap.values()).sort(this.comparator);
+    this.fromArray = Array.from(collectMap.values()).sort(this.comparator);
   },
   methods: {
     swapConfirmationModalOpen() {
       this.$children[0].$refs.swapconfirmation.show();
     },
     setFromCurrency(value) {
+      const collectMap = new Map();
+      if (bityCurrencies[value.symbol]) {
+        for(let prop in bityCurrencies){
+          if(prop !== value.symbol){
+            if(bityCurrencies[prop]) collectMap.set(prop, { symbol: prop, name: bityCurrencies[prop].name })
+          }
+        }
+      }
+      if (kyberCurrencies[value.symbol]) {
+        for(let prop in kyberCurrencies){
+          if(prop !== value.symbol){
+            if(kyberCurrencies[prop]) collectMap.set(prop, { symbol: prop, name: kyberCurrencies[prop].name })
+          }
+        }
+      }
+      if (changellyCurrencies[value.symbol]) {
+        for(let prop in changellyCurrencies){
+          if(prop !== value.symbol){
+            if(changellyCurrencies[prop]) collectMap.set(prop, { symbol: prop, name: changellyCurrencies[prop].name })
+          }
+        }
+      }
+      // if(collectMap.has(this.toCurrency))
+      collectMap.set('ETH', { symbol: 'ETH', name: 'Ether' })
+      this.toArray = Array.from(collectMap.values()).sort(this.comparator)
       console.log(value.symbol); // todo remove dev item
+
     },
     setToCurrency(value) {
+      const collectMap = new Map();
+      if (bityCurrencies[value.symbol]) {
+        for(let prop in bityCurrencies){
+          if(prop !== value.symbol){
+            if(bityCurrencies[prop]) collectMap.set(prop, { symbol: prop, name: bityCurrencies[prop].name })
+          }
+        }
+      }
+      if (kyberCurrencies[value.symbol]) {
+        for(let prop in kyberCurrencies){
+          if(prop !== value.symbol){
+            if(kyberCurrencies[prop]) collectMap.set(prop, { symbol: prop, name: kyberCurrencies[prop].name })
+          }
+        }
+      }
+      if (changellyCurrencies[value.symbol]) {
+        for(let prop in changellyCurrencies){
+          if(prop !== value.symbol){
+            if(changellyCurrencies[prop]) collectMap.set(prop, { symbol: prop, name: changellyCurrencies[prop].name })
+          }
+        }
+      }
+      // if(collectMap.has(this.toCurrency))
+      collectMap.set('ETH', { symbol: 'ETH', name: 'Ether' })
+      this.fromArray = Array.from(collectMap.values()).sort(this.comparator)
       console.log(value.symbol); // todo remove dev item
     },
     updateValidPairs() {
       // this.toArray;
+    },
+    comparator(a, b) {
+      a = a.symbol;
+      b = b.symbol;
+      return a < b ? -1 : a > b ? 1 : 0;
     }
   }
 };

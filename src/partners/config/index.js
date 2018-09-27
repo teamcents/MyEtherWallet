@@ -1,4 +1,19 @@
 import { bity } from './bityConfig';
-import currencies from './currencyDetails';
+import {
+  currencyMasterList,
+  currencies,
+  changellyCurrencies,
+  kyberCurrencies,
+  bityCurrencies,
+  fiat
+} from './currencyDetails';
 
-export { currencies, bity };
+export {
+  currencyMasterList,
+  currencies,
+  changellyCurrencies,
+  kyberCurrencies,
+  bityCurrencies,
+  fiat,
+  bity
+};
