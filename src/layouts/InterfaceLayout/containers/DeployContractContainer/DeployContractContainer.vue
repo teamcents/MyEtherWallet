@@ -140,8 +140,6 @@
         :question="$t('interface.haveIssues')"
         link="/"/>
     </div>
-    <!--<confirm-modal :showSuccess="showSuccessModal" :signedTx="signedTx" :fee="transactionFee" :gasPrice="$store.state.gasPrice" :from="$store.state.wallet.getAddressString()" :gas="gasLimit" :data="data" :nonce="nonce" :contractName="contractName" :abi="abi"></confirm-modal>-->
-    <!--<success-modal message="Sending Transaction" linkMessage="Close"></success-modal>-->
   </div>
 </template>
 
@@ -153,8 +151,7 @@ import { Misc } from '@/helpers';
 
 import store from 'store';
 
-// eslint-disable-next-line
-const unit = require('ethjs-unit');
+import * as unit from 'ethjs-unit';
 export default {
   name: 'DeployContract',
   components: {
@@ -171,7 +168,6 @@ export default {
       contractName: '',
       contractNamePlaceholder: '',
       raw: {},
-      signedTx: '',
       transactionFee: 0,
       gasAmount: this.$store.state.gasPrice,
       gasLimit: 21000,
@@ -239,7 +235,6 @@ export default {
           data: this.data.replace(/\s/g, '')
         };
 
-        const fromAddress = this.raw.from;
         const transactionFee = await this.$store.state.web3.eth.estimateGas(
           this.raw
         );
@@ -252,29 +247,7 @@ export default {
         // estimateGas was failing if chainId in present
         this.raw.chainId = this.$store.state.network.type.chainID || 1;
 
-        await web3.eth
-          .sendTransaction(this.raw)
-          .once('transactionHash', hash => {
-            this.$store.dispatch('addNotification', [
-              fromAddress,
-              hash,
-              'Transaction Hash: Contract Deploy'
-            ]);
-          })
-          .on('receipt', res => {
-            this.$store.dispatch('addNotification', [
-              fromAddress,
-              res,
-              'Transaction Receipt: Contract Deploy'
-            ]);
-          })
-          .on('error', err => {
-            this.$store.dispatch('addNotification', [
-              fromAddress,
-              err,
-              'Transaction Error'
-            ]);
-          });
+        await web3.eth.sendTransaction(this.raw);
       } catch (e) {
         // eslint-disable-next-line
         console.error(e); // todo replace with proper error

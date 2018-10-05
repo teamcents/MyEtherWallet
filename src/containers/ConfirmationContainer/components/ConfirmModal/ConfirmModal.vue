@@ -8,29 +8,19 @@
       title="Confirmation">
       <div class="modal-content qrcode-modal">
         <div class="tx-info">
-          <div class="tx-data tx-from">
-            <!-- <img src="~@/assets/images/icons/eth.svg">
-            <h3>1.00000 <span>ETH</span></h3> -->
-            <div class="address-info">
-              <p class="address-title">From Address</p>
-              <p>{{ from }}</p>
-            </div>
-          </div>
+          <address-block
+            :address="from"
+            :value="value"
+            direction="from"/>
           <div
             v-show="to !== '' && to !== undefined"
             class="direction">
             <img src="~@/assets/images/icons/right-arrow.svg">
           </div>
-          <div
+          <address-block
             v-show="to !== '' && to !== undefined"
-            class="tx-data tx-to">
-            <!-- <img src="~@/assets/images/icons/btc.svg">
-            <h3>0.006345 <span>BTC</span></h3> -->
-            <div class="address-info">
-              <p class="address-title">To Address</p>
-              <p>{{ to }}</p>
-            </div>
-          </div>
+            :address="to"
+            direction="to"/>
         </div>
         <div class="detail-info">
           <div class="info">
@@ -50,6 +40,9 @@
             <div class="grid-block">
               <p>Network</p><p>{{ $store.state.network.type.name }} by {{ $store.state.network.service }}</p>
             </div>
+            <!-- <div class="grid-block">
+              <p>Value</p><p>{{ unit.fromWei(value,'ether') }} eth</p>
+            </div> -->
             <div class="grid-block">
               <p>Gas Limit</p><p>{{ gas }} wei</p>
             </div>
@@ -108,10 +101,13 @@
 </template>
 
 <script>
-// eslint-disable-next-line
-const unit = require('ethjs-unit');
+import AddressBlock from '../AddressBlock';
+import * as unit from 'ethjs-unit';
 
 export default {
+  components: {
+    'address-block': AddressBlock
+  },
   props: {
     confirmSendTx: {
       type: Function,
@@ -161,7 +157,8 @@ export default {
   data() {
     return {
       modalDetailInformation: false,
-      transactionSigned: false
+      transactionSigned: false,
+      unit
     };
   },
   computed: {

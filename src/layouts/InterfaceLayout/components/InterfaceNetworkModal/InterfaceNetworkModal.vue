@@ -182,7 +182,6 @@
 
 <script>
 import store from 'store';
-import web3 from 'web3';
 
 import InterfaceBottomText from '@/components/InterfaceBottomText';
 import * as networkTypes from '@/networks/types';
@@ -281,7 +280,7 @@ export default {
           tokens: this.$store.state.Networks[this.selectedNetwork.name][0].type
             .tokens
         },
-        url: this.port === '' ? this.url : `${this.url}:${this.port}`,
+        url: this.url,
         username: this.username
       };
 
@@ -296,7 +295,7 @@ export default {
     switchNetwork(network) {
       this.selectedNetwork = network;
       this.$store.dispatch('switchNetwork', network);
-      this.$store.dispatch('setWeb3Instance', web3);
+      this.$store.dispatch('setWeb3Instance');
     }
   }
 };

@@ -394,3 +394,6 @@ const bity = {
     }
   ]
 };
+
+
+export default {bity}
