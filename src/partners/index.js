@@ -1,5 +1,5 @@
 import { BitySwap, bityCurrencies } from './bity';
-import { kyberCurrencies } from './kyber';
+import { kyberCurrencies } from './kyber/config/index';
 import { changellyCurrencies } from './changelly';
 import { currencies } from './config';
 import CurrencyFilter from './helpers';
