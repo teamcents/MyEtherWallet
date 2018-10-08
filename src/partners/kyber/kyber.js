@@ -89,7 +89,7 @@ export default class Kyber {
         this.getTokenAddress(toToken),
         userAddress,
         maxDestAmount,
-        this.convertToTokenWei(minRate, 'ETH'),
+        minRate,
         walletId
       )
       .encodeABI();
@@ -122,6 +122,7 @@ export default class Kyber {
   }
 
   async checkUserCap(swapValue, userAddress) {
+    // look at what checks are needed
     const weiValue = this.convertToTokenWei(swapValue, 'ETH');
     const userCap = await this.getUserCapInWei(userAddress);
     const numberAsBN = this.web3.toBN(weiValue);
@@ -163,12 +164,12 @@ export default class Kyber {
     const data = contract.methods
       .Approval(userAddress, this.getKyberNetworkAddress(), weiValue)
       .encodeABI();
-
-    return {
-      value: 0,
-      to: this.getTokenAddress(fromToken),
-      data: data
-    };
+    return data;
+    // return {
+    //   value: 0,
+    //   to: this.getTokenAddress(fromToken),
+    //   data: data
+    // };
   }
 
   // not a transaction, just a read-only call
@@ -205,5 +206,55 @@ export default class Kyber {
       .call();
 
     return data[0];
+  }
+
+  // async generateTransactions(fromToken, toToken, fromValue, toValue, userAddress) {
+  //   const prepareSwapTxData = this.canUserSwap(fromToken, toToken, fromValue, toValue, userAddress);
+  //   const kyberSwap = this.getTradeData()
+  //     };
+
+  async canUserSwap(fromToken, toToken, fromValue, toValue, userAddress) {
+    let userCap = true;
+    if (fromToken === 'ETH' || toToken === 'ETH') {
+      const checkValue = fromToken === 'ETH' ? fromValue : toValue;
+      userCap = await this.checkUserCap(checkValue, userAddress);
+    }
+    const tokenBalance = await this.getBalance();
+    const userTokenBalance = this.web3.utils.toBN(tokenBalance);
+    const hasEnoughTokens = userTokenBalance.gte(fromValue);
+
+    if (userCap && hasEnoughTokens) {
+      const { approve, reset } = await this.isTokenApprovalNeeded();
+      if (approve && reset) {
+        return [
+          this.approveKyber(0, fromToken, userAddress),
+          this.approveKyber(fromValue, fromToken, userAddress)
+        ];
+      } else if (approve) {
+        return [this.approveKyber(
+          fromValue,
+          fromToken,
+          userAddress
+        )];
+      }
+      return [];
+    }
+    const reason = userCap ? 'user cap value' : 'current token balance';
+    throw Error(`User is not eligible to use kyber network. Current swap value exceeds ${reason}`);
+  }
+
+  async isTokenApprovalNeeded(fromToken, toToken, fromValue, userAddress) {
+    if (fromToken === 'ETH') return { approve: false, reset: false };
+
+    const currentAllowance = await this.allowance(fromToken, userAddress);
+
+    if (currentAllowance > 0) {
+      const allocationNeeded = this.convertToTokenWei(fromValue, fromToken);
+      if (currentAllowance < allocationNeeded) {
+        return { approve: true, reset: true };
+      }
+      return { approve: false, reset: false };
+    }
+    return { approve: true, reset: false };
   }
 }
