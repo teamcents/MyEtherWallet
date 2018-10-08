@@ -1,6 +1,5 @@
 <template>
   <div class="access-my-wallet-options">
-
     <mew-connect-modal
       ref="mewconnectModal"
       :network-and-address-open="networkAndAddressOpen"/>
@@ -205,6 +204,9 @@ export default {
       this.$refs.hardwarePasswordModal.$refs.password.show();
     },
     hardwareWalletOpen(wallet) {
+      if (this.$refs.mnemonicPhrasePassword.$refs.password.visible) {
+        this.$refs.mnemonicPhrasePassword.$refs.password.hide();
+      }
       try {
         this.walletConstructor = function() {};
         this.hardwareBrand = '';
@@ -222,5 +224,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import 'AccessMyWalletContainer.scss';
+@import 'AccessMyWalletContainer-desktop.scss';
+@import 'AccessMyWalletContainer-tablet.scss';
+@import 'AccessMyWalletContainer-mobile.scss';
 </style>

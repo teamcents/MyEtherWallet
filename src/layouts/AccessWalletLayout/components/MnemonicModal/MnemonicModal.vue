@@ -3,7 +3,7 @@
     ref="mnemonicPhrase"
     :title="$t('accessWallet.accessByMnemonicPhrase')"
     hide-footer
-    class="bootstrap-modal modal-metamask"
+    class="bootstrap-modal padding-20 modal-metamask"
     centered>
 
     <div class="contents">
@@ -32,6 +32,7 @@
             v-for="index in mnemonicSize"
             :key="index">
             <span>{{ index }}.</span><input
+              :id="'word' + (index - 1)"
               v-model="mnemonicPhrase[index - 1]"
               type="text"
               name="">
@@ -95,5 +96,7 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-@import 'MnemonicModal.scss';
+@import 'MnemonicModal-desktop.scss';
+@import 'MnemonicModal-tablet.scss';
+@import 'MnemonicModal-mobile.scss';
 </style>

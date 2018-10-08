@@ -11,7 +11,10 @@
           <address-block
             :address="from"
             :value="value"
-            direction="from"/>
+            :token-transfer-val="tokenTransferVal"
+            :token-symbol="tokenSymbol"
+            direction="from"
+          />
           <div
             v-show="to !== '' && to !== undefined"
             class="direction">
@@ -20,7 +23,12 @@
           <address-block
             v-show="to !== '' && to !== undefined"
             :address="to"
-            direction="to"/>
+            :token-transfer-to="tokenTransferTo"
+            :token-transfer-val="tokenTransferVal"
+            :token-symbol="tokenSymbol"
+            :value="value"
+            direction="to"
+          />
         </div>
         <div class="detail-info">
           <div class="info">
@@ -103,6 +111,7 @@
 <script>
 import AddressBlock from '../AddressBlock';
 import * as unit from 'ethjs-unit';
+import BigNumber from 'bignumber.js';
 
 export default {
   components: {
@@ -123,7 +132,7 @@ export default {
     },
     data: {
       type: String,
-      default: ''
+      default: '0x'
     },
     from: {
       type: String,
@@ -158,7 +167,10 @@ export default {
     return {
       modalDetailInformation: false,
       transactionSigned: false,
-      unit
+      unit,
+      tokenTransferTo: '',
+      tokenTransferVal: '',
+      tokenSymbol: ''
     };
   },
   computed: {
@@ -171,10 +183,59 @@ export default {
       return '';
     }
   },
+  watch: {
+    data(newVal) {
+      this.parseData(newVal);
+    }
+  },
+  mounted() {
+    if (this.data !== '0x') {
+      this.parseData(this.data);
+    }
+  },
   methods: {
     sendTx() {
       if (this.signedTx !== '') {
         this.confirmSendTx();
+      }
+    },
+    async parseData(data) {
+      const web3 = this.$store.state.web3;
+      const networkToken = this.$store.state.network.type.tokens;
+      const tokenIndex = networkToken.findIndex(el => {
+        return el.address.toLowerCase() === this.to.toLowerCase();
+      });
+
+      const jsonInterface = {
+        constant: false,
+        inputs: [
+          { name: '_to', type: 'address' },
+          { name: '_amount', type: 'uint256' }
+        ],
+        name: 'transfer',
+        outputs: [{ name: '', type: 'bool' }],
+        payable: false,
+        stateMutability: 'nonpayable',
+        type: 'function'
+      };
+      const transferFuncSig = web3.eth.abi.encodeFunctionSignature(
+        jsonInterface
+      );
+      if (data.substr(0, 10) === transferFuncSig) {
+        const params = web3.eth.abi.decodeParameters(
+          ['address', 'uint256'],
+          `${data.substr(10)}`
+        );
+        const value = new BigNumber(params[1]);
+        this.tokenTransferTo = params[0];
+        this.tokenTransferVal =
+          tokenIndex !== -1
+            ? value
+                .div(new BigNumber(10).pow(networkToken[tokenIndex].decimals))
+                .toFixed()
+            : value;
+        this.tokenSymbol =
+          tokenIndex !== -1 ? networkToken[tokenIndex].symbol : 'Unknown Token';
       }
     }
   }

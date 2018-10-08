@@ -66,7 +66,7 @@ export default {
         mnemonicPassword: this.password
       })
         .then(wallet => {
-          this.$refs.password.hide();
+          // this.$refs.password.hide();  // TODO: confirm moving this to parent still functions as expected
           this.password = '';
           this.hardwareWalletOpen(wallet);
         })
@@ -82,5 +82,7 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-@import 'MnemonicPasswordModal.scss';
+@import 'MnemonicPasswordModal-desktop.scss';
+@import 'MnemonicPasswordModal-tablet.scss';
+@import 'MnemonicPasswordModal-mobile.scss';
 </style>
