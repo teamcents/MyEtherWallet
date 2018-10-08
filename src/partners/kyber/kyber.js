@@ -231,16 +231,14 @@ export default class Kyber {
           this.approveKyber(fromValue, fromToken, userAddress)
         ];
       } else if (approve) {
-        return [this.approveKyber(
-          fromValue,
-          fromToken,
-          userAddress
-        )];
+        return [this.approveKyber(fromValue, fromToken, userAddress)];
       }
       return [];
     }
     const reason = userCap ? 'user cap value' : 'current token balance';
-    throw Error(`User is not eligible to use kyber network. Current swap value exceeds ${reason}`);
+    throw Error(
+      `User is not eligible to use kyber network. Current swap value exceeds ${reason}`
+    );
   }
 
   async isTokenApprovalNeeded(fromToken, toToken, fromValue, userAddress) {
