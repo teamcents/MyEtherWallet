@@ -11,7 +11,7 @@
           v-model="privateKey"
           type="text"
           name="PrivateKey"
-          autocomplete="off" >
+          autocomplete="off">
       </div>
       <button
         :disabled=" privateKey === '' && privateKey.length === 0 && privateKey.length < 9"
@@ -26,6 +26,7 @@
 
 <script>
 import { BasicWallet } from '@/wallets';
+
 export default {
   data() {
     return {
@@ -48,5 +49,7 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-@import 'PrivateKeyModal.scss';
+@import 'PrivateKeyModal-desktop.scss';
+@import 'PrivateKeyModal-tablet.scss';
+@import 'PrivateKeyModal-mobile.scss';
 </style>
