@@ -1,4 +1,4 @@
-import { shallowMount } from '@vue/test-utils';
+import Vue from 'vue';
 
 xdescribe('GenerateInfo.vue', () => {
   it('should render correct contents', () => {

@@ -1,16 +1,24 @@
-import { shallowMount } from '@vue/test-utils';
+import Vue from 'vue';
 
-xdescribe('SuccessModal.vue', () => {
+import { shallowMount ,createLocalVue} from '@vue/test-utils'
+import SuccessModal from '@/containers/ConfirmationContainer/components/SuccessModal/SuccessModal.vue';
+import BootstrapVue from "bootstrap-vue"
+const localVue = createLocalVue()
+localVue.use(BootstrapVue);
+
+describe('SuccessModal.vue', () => {
   it('should render correct contents', () => {
-    /*    const Constructor = Vue.extend(Component)
-        const vm = new Constructor({
-          propsData: {
-            // address: '0xDECAF9CD2367cdbb726E904cD6397eDFcAe6068D'
-          }
-        }).$mount()
-        expect(vm.$el.style['background-image'])
-          .toEqual('')
-          */
+      const message = 'message'
+      const linkMessage = 'linkMessage'
+      const linkTo = 'linkTo';
+      const wrapper = shallowMount(SuccessModal, {
+        localVue,
+        attachToDocument:true, 
+        propsData: { message, linkTo, linkMessage}
+      });
+
+      expect(wrapper.vm.$el.querySelector('.d-block p').textContent.trim()).toEqual(message);
+      expect(wrapper.vm.$el.querySelector('.button-container').textContent.trim()).toEqual(linkMessage);
   });
 
   describe('SuccessModal.vue Methods', () => {});

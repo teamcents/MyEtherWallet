@@ -1,4 +1,4 @@
-import { shallowMount } from '@vue/test-utils';
+import Vue from 'vue';
 import store from '@/store';
 import GenerateTx from '@/layouts/InterfaceLayout/components/GenerateTx/GenerateTx.vue';
 

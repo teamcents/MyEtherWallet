@@ -1,4 +1,4 @@
-import { shallowMount } from '@vue/test-utils';
+import Vue from 'vue';
 
 xdescribe('wallet.worker.js', () => {
   it('should render correct contents', () => {

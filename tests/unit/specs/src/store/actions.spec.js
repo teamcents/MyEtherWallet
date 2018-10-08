@@ -1,4 +1,4 @@
-import { shallowMount } from '@vue/test-utils';
+import Vue from 'vue';
 
 xdescribe('actions.js', () => {
   it('should render correct contents', () => {
