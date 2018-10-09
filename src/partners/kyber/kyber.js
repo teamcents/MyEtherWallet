@@ -1,9 +1,15 @@
+import BigNumber from 'bignumber.js';
 import {
   kyberCurrencies,
   kyberAddressFallback,
-  kyberNetworkABI
+  kyberNetworkABI,
+  ERC20
 } from './config';
 
+/**
+ * Note: Need to implement checks for these
+ * Source amount is too small. Minimum amount is 0.001 ETH equivalent.
+ */
 export default class Kyber {
   constructor(props = {}) {
     this.gasLimit = 300000;
@@ -12,12 +18,12 @@ export default class Kyber {
     this.tokenDetails = props.currencies || kyberCurrencies;
     this.web3 = props.web3;
     this.ens = props.ens;
-    this.kyberNetworkABI = {};
-    this.kyberNetworkAddress = kyberAddressFallback;
+    this.kyberNetworkABI = kyberNetworkABI || [];
+    this.kyberNetworkAddress = props.kyberAddress || kyberAddressFallback;
     // eslint-disable-next-line prefer-const
-    for (let i in kyberNetworkABI) {
-      this.kyberNetworkABI[kyberNetworkABI[i].name] = kyberNetworkABI[i];
-    }
+    // for (let i in kyberNetworkABI) {
+    //   this.kyberNetworkABI[kyberNetworkABI[i].name] = kyberNetworkABI[i];
+    // }
     this.getMainNetAddress();
     this.setupKyberContractObject(this.kyberNetworkAddress);
   }
@@ -39,33 +45,30 @@ export default class Kyber {
   }
 
   setupKyberContractObject(address) {
-    this.kyberNetwork = new this.web3.eth.Contract(kyberNetworkABI, address);
+    this.kyberNetworkContract = new this.web3.eth.Contract(
+      this.kyberNetworkABI,
+      address
+    );
   }
 
   getTokenAddress(_token) {
-    return this.tokenDetails[_token].address;
+    try {
+      return this.tokenDetails[_token].address;
+    } catch (e) {
+      throw Error('Token not included in kyber network list of tokens');
+    }
   }
 
-  convertToTokenBase(_value, _token) {
-    const decimals = this.tokenDetails[_token].decimals;
-    const denominator = this.web3.utils
-      .toBN(10)
-      .pow(this.web3.utils.toBN(decimals));
-    return this.web3.utils
-      .toBN(_value)
-      .div(denominator)
-      .toString(10);
+  convertToTokenBase(token, value) {
+    const decimals = this.tokenDetails[token].decimals;
+    const denominator = new BigNumber(10).pow(decimals);
+    return new BigNumber(value).div(denominator).toString(10);
   }
 
-  convertToTokenWei(_value, _token) {
-    const decimals = this.tokenDetails[_token].decimals;
-    const denominator = this.web3.utils
-      .toBN(10)
-      .pow(this.web3.utils.toBN(decimals));
-    return this.web3.utils
-      .toBN(_value)
-      .times(denominator)
-      .toString(10);
+  convertToTokenWei(token, value) {
+    const decimals = this.tokenDetails[token].decimals;
+    const denominator = new BigNumber(10).pow(decimals);
+    return new BigNumber(value).times(denominator).toString(10);
   }
 
   getKyberNetworkAddress() {
@@ -78,17 +81,17 @@ export default class Kyber {
 
   findBestRate() {}
 
-  getTradeData(fromToken, toToken, fromValue, minRate, userAddress) {
+  async getTradeData(fromToken, toToken, fromValue, minRate, userAddress) {
     const walletId = '0xDECAF9CD2367cdbb726E904cD6397eDFcAe6068D'; // TODO move to config
     const maxDestAmount = 2 ** 200; // TODO move to config
 
-    return this.kyberNetwork.methods
+    return this.kyberNetworkContract.methods
       .trade(
-        this.getTokenAddress(fromToken),
-        this.convertToTokenWei(fromValue, fromToken),
-        this.getTokenAddress(toToken),
+        await this.getTokenAddress(fromToken),
+        await this.convertToTokenWei(fromToken, fromValue),
+        await this.getTokenAddress(toToken),
         userAddress,
-        maxDestAmount,
+        1000000000000000, //maxDestAmount,
         minRate,
         walletId
       )
@@ -96,75 +99,49 @@ export default class Kyber {
   }
 
   async getBalance(fromToken, userAddress) {
-    const balance = await this.kyberNetwork.methods
+    return await this.kyberNetworkContract.methods
       .getBalance(this.getTokenAddress(fromToken), userAddress)
       .call();
-
-    return balance[0];
   }
 
   async getExpectedRate(fromToken, toToken, fromValue) {
-    const rates = await this.kyberNetwork.methods
+    const rates = await this.kyberNetworkContract.methods
       .getExpectedRate(
         this.getTokenAddress(fromToken),
         this.getTokenAddress(toToken),
-        this.convertToTokenWei(fromValue, fromToken)
+        this.convertToTokenWei(fromToken, fromValue)
       )
       .call();
     return rates['expectedRate'];
   }
 
   async getUserCapInWei(userAddress) {
-    const data = await this.kyberNetwork.methods
+    return await this.kyberNetworkContract.methods
       .getUserCapInWei(userAddress)
       .call();
-    return data[0];
   }
 
   async checkUserCap(swapValue, userAddress) {
     // look at what checks are needed
-    const weiValue = this.convertToTokenWei(swapValue, 'ETH');
+    const weiValue = this.convertToTokenWei('ETH', swapValue);
     const userCap = await this.getUserCapInWei(userAddress);
-    const numberAsBN = this.web3.toBN(weiValue);
-    const nineFivePct = this.web3.toBN(userCap).times(0.95);
+    const numberAsBN = new BigNumber(weiValue);
+    const nineFivePct = new BigNumber(userCap).times(0.95);
     // let nineFivePctUserCap = this.convertToTokenWei(nineFivePct, 'ETH');
     return nineFivePct.gt(numberAsBN);
   }
 
   kyberNetworkState() {}
 
-  approveKyber(fromValue, fromToken, userAddress) {
-    const jsonInterface = [
-      {
-        anonymous: false,
-        inputs: [
-          {
-            indexed: true,
-            name: '_owner',
-            type: 'address'
-          },
-          {
-            indexed: true,
-            name: '_spender',
-            type: 'address'
-          },
-          {
-            indexed: false,
-            name: '_value',
-            type: 'uint256'
-          }
-        ],
-        name: 'Approval',
-        type: 'event'
-      }
-    ];
-
-    const weiValue = this.convertToTokenWei(fromValue, fromToken);
-    const contract = new this.web3.eth.Contract(jsonInterface);
-    const data = contract.methods
-      .Approval(userAddress, this.getKyberNetworkAddress(), weiValue)
+  approveKyber(fromToken, fromValue) {
+    const weiValue = this.convertToTokenWei(fromToken, fromValue);
+    const contract = new this.web3.eth.Contract(
+      ERC20,
+      this.getTokenAddress(fromToken)
+    );
+    return contract.methods
+      .approve(this.getKyberNetworkAddress(), weiValue)
       .encodeABI();
-    return data;
     // return {
     //   value: 0,
     //   to: this.getTokenAddress(fromToken),
@@ -174,44 +151,47 @@ export default class Kyber {
 
   // not a transaction, just a read-only call
   async allowance(fromToken, userAddress) {
-    const jsonInterface = [
-      {
-        constant: true,
-        inputs: [
-          {
-            name: '_owner',
-            type: 'address'
-          },
-          {
-            name: '_spender',
-            type: 'address'
-          }
-        ],
-        name: 'allowance',
-        outputs: [
-          {
-            name: '',
-            type: 'uint256'
-          }
-        ],
-        payable: false,
-        stateMutability: 'view',
-        type: 'function'
-      }
-    ];
-
-    const contract = new this.web3.eth.Contract(jsonInterface);
-    const data = await contract.methods
+    const contract = new this.web3.eth.Contract(
+      ERC20,
+      this.getTokenAddress(fromToken)
+    );
+    return await contract.methods
       .allowance(userAddress, this.getKyberNetworkAddress())
       .call();
-
-    return data[0];
   }
 
-  // async generateTransactions(fromToken, toToken, fromValue, toValue, userAddress) {
-  //   const prepareSwapTxData = this.canUserSwap(fromToken, toToken, fromValue, toValue, userAddress);
-  //   const kyberSwap = this.getTradeData()
-  //     };
+  async generateDataForTransactions(
+    fromToken,
+    toToken,
+    fromValue,
+    toValue,
+    rate,
+    userAddress
+  ) {
+    try {
+      const prepareSwapTxData = await this.canUserSwap(
+        fromToken,
+        toToken,
+        fromValue,
+        toValue,
+        userAddress
+      );
+      if (Array.isArray(prepareSwapTxData)) {
+        const kyberSwap = await this.getTradeData(
+          fromToken,
+          toToken,
+          fromValue,
+          rate,
+          userAddress
+        );
+
+        return prepareSwapTxData.push(kyberSwap);
+      }
+    } catch (e) {
+      console.log(e); // todo remove dev item
+      throw e;
+    }
+  }
 
   async canUserSwap(fromToken, toToken, fromValue, toValue, userAddress) {
     let userCap = true;
@@ -219,26 +199,33 @@ export default class Kyber {
       const checkValue = fromToken === 'ETH' ? fromValue : toValue;
       userCap = await this.checkUserCap(checkValue, userAddress);
     }
-    const tokenBalance = await this.getBalance();
-    const userTokenBalance = this.web3.utils.toBN(tokenBalance);
+    const tokenBalance = await this.getBalance(fromToken, userAddress);
+    const userTokenBalance = new BigNumber(tokenBalance);
     const hasEnoughTokens = userTokenBalance.gte(fromValue);
 
+    console.log(userCap); // todo remove dev item
+    console.log(hasEnoughTokens); // todo remove dev item
+    console.log(userCap && hasEnoughTokens); // todo remove dev item
     if (userCap && hasEnoughTokens) {
-      const { approve, reset } = await this.isTokenApprovalNeeded();
+      const { approve, reset } = await this.isTokenApprovalNeeded(
+        fromToken,
+        toToken,
+        fromValue,
+        userAddress
+      );
       if (approve && reset) {
         return [
-          this.approveKyber(0, fromToken, userAddress),
-          this.approveKyber(fromValue, fromToken, userAddress)
+          this.approveKyber(fromToken, 0, userAddress),
+          this.approveKyber(fromToken, fromValue, userAddress)
         ];
       } else if (approve) {
-        return [this.approveKyber(fromValue, fromToken, userAddress)];
+        return [this.approveKyber(fromToken, fromValue, userAddress)];
       }
       return [];
     }
-    const reason = userCap ? 'user cap value' : 'current token balance';
-    throw Error(
-      `User is not eligible to use kyber network. Current swap value exceeds ${reason}`
-    );
+    const reason = !userCap ? 'user cap value' : 'current token balance';
+    const errorMessage = `User is not eligible to use kyber network. Current swap value exceeds ${reason}`;
+    throw Error(errorMessage);
   }
 
   async isTokenApprovalNeeded(fromToken, toToken, fromValue, userAddress) {
@@ -247,7 +234,7 @@ export default class Kyber {
     const currentAllowance = await this.allowance(fromToken, userAddress);
 
     if (currentAllowance > 0) {
-      const allocationNeeded = this.convertToTokenWei(fromValue, fromToken);
+      const allocationNeeded = this.convertToTokenWei(fromToken, fromValue);
       if (currentAllowance < allocationNeeded) {
         return { approve: true, reset: true };
       }

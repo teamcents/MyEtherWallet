@@ -1,5 +1,6 @@
 import { kyberCurrencies } from './currencies';
 import { kyberAddressFallback } from './kyberAddresses';
-import kyberNetworkABI from './KyberNetworkABI';
+import kyberNetworkABI from './kyberNetworkABI';
+import ERC20 from './EthTokenABI';
 
-export { kyberCurrencies, kyberAddressFallback, kyberNetworkABI };
+export { kyberCurrencies, kyberAddressFallback, kyberNetworkABI, ERC20 };

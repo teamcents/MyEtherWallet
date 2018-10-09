@@ -1,4 +1,4 @@
-export const kyberNetworkABI = [
+const kyberNetworkABI = [
   {
     constant: false,
     inputs: [
@@ -845,3 +845,6 @@ export const kyberNetworkABI = [
     type: 'event'
   }
 ];
+
+
+export default kyberNetworkABI

@@ -82,17 +82,27 @@ export default class BitySwap {
     // finalize order, update estimate, etc.
   }
 
-  submitOrder(orderObject) {
+  submitOrder(fromToken, toToken, fromValue, toValue, rate, userAddress, isFrom) {
     var order = {
-      amount: orderObject.amount,
-      mode: orderObject.isFrom ? 0 : 1, // check how I should handle this now
-      pair: orderObject.fromCoin + orderObject.toCoin,
-      destAddress: orderObject.toAddress
+      amount: fromValue,
+      mode: isFrom ? 0 : 1, // check how I should handle this now
+      pair: fromToken + toToken,
+      destAddress: userAddress
     };
+
     return this.openOrder(order)
       .then(data => {
         this.currentOrder = data;
-        this.currentOrder.swapOrder = orderObject;
+        this.currentOrder.swapOrder = {
+          fromCoin: fromToken,
+          toCoin: toToken,
+          isFrom: isFrom,
+          fromVal: fromValue,
+          toVal: toValue,
+          toAddress: userAddress,
+          swapRate: rate,
+          swapPair: fromToken + toToken
+        };
         return this.currentOrder
       })
   }
