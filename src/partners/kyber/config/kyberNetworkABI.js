@@ -846,5 +846,4 @@ const kyberNetworkABI = [
   }
 ];
 
-
-export default kyberNetworkABI
+export default kyberNetworkABI;

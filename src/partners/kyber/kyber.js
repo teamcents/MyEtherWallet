@@ -7,8 +7,9 @@ import {
 } from './config';
 
 /**
- * Note: Need to implement checks for these
- * Source amount is too small. Minimum amount is 0.001 ETH equivalent.
+ * Note: Need to implement checks for these:
+ *   - Source amount is too small. Minimum amount is 0.001 ETH equivalent.
+ *   - Ask about ETH equivalent in relation to User Cap
  */
 export default class Kyber {
   constructor(props = {}) {
@@ -20,10 +21,6 @@ export default class Kyber {
     this.ens = props.ens;
     this.kyberNetworkABI = kyberNetworkABI || [];
     this.kyberNetworkAddress = props.kyberAddress || kyberAddressFallback;
-    // eslint-disable-next-line prefer-const
-    // for (let i in kyberNetworkABI) {
-    //   this.kyberNetworkABI[kyberNetworkABI[i].name] = kyberNetworkABI[i];
-    // }
     this.getMainNetAddress();
     this.setupKyberContractObject(this.kyberNetworkAddress);
   }
@@ -75,15 +72,11 @@ export default class Kyber {
     return this.kyberNetworkAddress;
   }
 
-  // createDataHex(method) {
-  //   return this.kyberNetwork.methods.transfer(this.address, amount).encodeABI();
-  // }
-
   findBestRate() {}
 
   async getTradeData(fromToken, toToken, fromValue, minRate, userAddress) {
     const walletId = '0xDECAF9CD2367cdbb726E904cD6397eDFcAe6068D'; // TODO move to config
-    const maxDestAmount = 2 ** 200; // TODO move to config
+    const maxDestAmount = 1000000000000000; // 2 ** 200; // TODO move to config
 
     return this.kyberNetworkContract.methods
       .trade(
@@ -91,7 +84,7 @@ export default class Kyber {
         await this.convertToTokenWei(fromToken, fromValue),
         await this.getTokenAddress(toToken),
         userAddress,
-        1000000000000000, //maxDestAmount,
+        maxDestAmount,
         minRate,
         walletId
       )
@@ -122,12 +115,10 @@ export default class Kyber {
   }
 
   async checkUserCap(swapValue, userAddress) {
-    // look at what checks are needed
     const weiValue = this.convertToTokenWei('ETH', swapValue);
     const userCap = await this.getUserCapInWei(userAddress);
     const numberAsBN = new BigNumber(weiValue);
     const nineFivePct = new BigNumber(userCap).times(0.95);
-    // let nineFivePctUserCap = this.convertToTokenWei(nineFivePct, 'ETH');
     return nineFivePct.gt(numberAsBN);
   }
 
@@ -142,11 +133,6 @@ export default class Kyber {
     return contract.methods
       .approve(this.getKyberNetworkAddress(), weiValue)
       .encodeABI();
-    // return {
-    //   value: 0,
-    //   to: this.getTokenAddress(fromToken),
-    //   data: data
-    // };
   }
 
   // not a transaction, just a read-only call
@@ -188,7 +174,6 @@ export default class Kyber {
         return prepareSwapTxData.push(kyberSwap);
       }
     } catch (e) {
-      console.log(e); // todo remove dev item
       throw e;
     }
   }
@@ -203,9 +188,6 @@ export default class Kyber {
     const userTokenBalance = new BigNumber(tokenBalance);
     const hasEnoughTokens = userTokenBalance.gte(fromValue);
 
-    console.log(userCap); // todo remove dev item
-    console.log(hasEnoughTokens); // todo remove dev item
-    console.log(userCap && hasEnoughTokens); // todo remove dev item
     if (userCap && hasEnoughTokens) {
       const { approve, reset } = await this.isTokenApprovalNeeded(
         fromToken,
